@@ -3,10 +3,14 @@
 # Creates a self-contained Sourcetrail.app bundle and optional .dmg for macOS.
 #
 # Usage:
-#   ./bundle_macos.sh <build-dir>
+#   ./bundle_macos.sh <build-dir> [--dmg]
+#
+# Options:
+#   --dmg    Also create a .dmg disk image (skips interactive prompt)
 #
 # Example:
 #   ./bundle_macos.sh /Users/you/dev-local/build/system-macos-release
+#   ./bundle_macos.sh /Users/you/dev-local/build/system-macos-release --dmg
 #
 # Prerequisites:
 #   - Successful cmake build in <build-dir>
@@ -30,8 +34,10 @@ success() { echo -e "${GREEN}>>>${RESET} $1"; }
 # Arguments
 # ---------------------------------------------------------------------------
 
-BUILD_DIR="${1:?Usage: $0 <build-dir>}"
+BUILD_DIR="${1:?Usage: $0 <build-dir> [--dmg]}"
 BUILD_DIR="$(cd "$BUILD_DIR" && pwd)"
+CREATE_DMG=false
+[[ "${2:-}" == "--dmg" ]] && CREATE_DMG=true
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -229,11 +235,14 @@ success "Bundle created: $BUNDLE_PATH ($BUNDLE_SIZE)"
 # Optional: create .dmg
 # ---------------------------------------------------------------------------
 
-echo ""
-read -p "Create .dmg disk image? [y/N] " -n 1 -r
-echo ""
+if [[ "$CREATE_DMG" == false && -t 0 ]]; then
+    echo ""
+    read -p "Create .dmg disk image? [y/N] " -n 1 -r
+    echo ""
+    [[ $REPLY =~ ^[Yy]$ ]] && CREATE_DMG=true
+fi
 
-if [[ $REPLY =~ ^[Yy]$ ]]; then
+if [[ "$CREATE_DMG" == true ]]; then
     DMG_PATH="$BUILD_DIR/${PACKAGE_NAME}.dmg"
     info "Creating DMG at $DMG_PATH"
 

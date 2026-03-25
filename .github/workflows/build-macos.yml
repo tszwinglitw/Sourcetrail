@@ -1,0 +1,43 @@
+name: Build macOS
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew install llvm@18 qt@6 boost icu4c sqlite tinyxml2 catch2 googletest maven openjdk@21 ninja
+
+      - name: Configure
+        run: |
+          export JAVA_HOME="$(brew --prefix openjdk@21)/libexec/openjdk.jdk/Contents/Home"
+          cmake --preset system-macos-release \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix llvm@18);$(brew --prefix qt@6);$(brew --prefix boost);$(brew --prefix icu4c);$(brew --prefix sqlite)" \
+            -DJAVA_INCLUDE_PATH="$JAVA_HOME/include" \
+            -DJAVA_INCLUDE_PATH2="$JAVA_HOME/include/darwin" \
+            -DJAVA_AWT_LIBRARY="$JAVA_HOME/lib/libjawt.dylib" \
+            -DJAVA_JVM_LIBRARY="$JAVA_HOME/lib/server/libjvm.dylib" \
+            -DBUILD_UNIT_TESTS_PACKAGE=OFF
+
+      - name: Build
+        run: cmake --build ../build/system-macos-release
+
+      - name: Bundle .app
+        run: |
+          ./setup/macOS/bundle_macos.sh ../build/system-macos-release
+
+      - name: Upload .app bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sourcetrail-macOS
+          path: ../build/system-macos-release/Sourcetrail_*_macOS/Sourcetrail.app
