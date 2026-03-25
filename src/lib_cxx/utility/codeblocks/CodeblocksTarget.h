@@ -7,7 +7,7 @@
 
 #include "CodeblocksTargetRelationType.h"
 
-class TiXmlElement;
+namespace tinyxml2 { class XMLElement; }
 
 namespace Codeblocks
 {
@@ -17,7 +17,7 @@ class Target
 {
 public:
 	static std::string getXmlElementName();
-	static std::shared_ptr<Target> create(const TiXmlElement* element);
+	static std::shared_ptr<Target> create(const tinyxml2::XMLElement* element);
 
 	std::string getTitle() const;
 	std::shared_ptr<const Compiler> getCompiler() const;

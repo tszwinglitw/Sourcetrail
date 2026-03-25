@@ -1,6 +1,8 @@
 #include "CodeblocksProject.h"
 
-#include "tinyxml.h"
+#include "tinyxml2.h"
+
+using namespace tinyxml2;
 
 #include "ApplicationSettings.h"
 #include "CodeblocksCompiler.h"
@@ -30,19 +32,19 @@ std::shared_ptr<Project> Project::load(std::shared_ptr<TextAccess> xmlAccess)
 
 	std::shared_ptr<Project> project(new Project(xmlAccess->getFilePath()));
 
-	TiXmlDocument doc;
-	doc.Parse(xmlAccess->getText().c_str(), nullptr, TIXML_ENCODING_UTF8);
+	XMLDocument doc;
+	doc.Parse(xmlAccess->getText().c_str());
 	if (doc.Error())
 	{
 		LOG_ERROR(
-			"Unable to parse Code::Blocks project because of an error in row " +
-			std::to_string(doc.ErrorRow()) + ", col " + std::to_string(doc.ErrorCol()) + ": " +
-			std::string(doc.ErrorDesc()));
+			"Unable to parse Code::Blocks project because of an error in line " +
+			std::to_string(doc.ErrorLineNum()) + ": " +
+			std::string(doc.ErrorStr()));
 		return project;
 	}
 
-	TiXmlElement* codeBlocksProjectFileElement;
-	TiXmlHandle docHandle(&doc);
+	XMLElement* codeBlocksProjectFileElement;
+	XMLHandle docHandle(&doc);
 	{
 		codeBlocksProjectFileElement =
 			docHandle.FirstChildElement("CodeBlocks_project_file").ToElement();
@@ -59,23 +61,23 @@ std::shared_ptr<Project> Project::load(std::shared_ptr<TextAccess> xmlAccess)
 	}
 
 	{
-		TiXmlElement* versionElement = codeBlocksProjectFileElement->FirstChildElement(
+		XMLElement* versionElement = codeBlocksProjectFileElement->FirstChildElement(
 			"FileVersion");
 
-		if (versionElement->QueryIntAttribute("major", &project->m_versionMajor) != TIXML_SUCCESS)
+		if (versionElement->QueryIntAttribute("major", &project->m_versionMajor) != XML_SUCCESS)
 		{
 			LOG_ERROR("Unable to find \"Project\" node in Code::Blocks project.");
 			return project;
 		}
 
-		if (versionElement->QueryIntAttribute("minor", &project->m_versionMinor) != TIXML_SUCCESS)
+		if (versionElement->QueryIntAttribute("minor", &project->m_versionMinor) != XML_SUCCESS)
 		{
 			LOG_ERROR("Unable to find \"Project\" node in Code::Blocks project.");
 			return project;
 		}
 	}
 
-	const TiXmlElement* projectElement = codeBlocksProjectFileElement->FirstChildElement("Project");
+	const XMLElement* projectElement = codeBlocksProjectFileElement->FirstChildElement("Project");
 	if (codeBlocksProjectFileElement == nullptr)
 	{
 		LOG_ERROR("Unable to find \"Project\" node in Code::Blocks project.");
@@ -83,7 +85,7 @@ std::shared_ptr<Project> Project::load(std::shared_ptr<TextAccess> xmlAccess)
 	}
 
 	{
-		const TiXmlElement* optionElement = projectElement->FirstChildElement("Option");
+		const XMLElement* optionElement = projectElement->FirstChildElement("Option");
 		while (optionElement)
 		{
 			{
@@ -99,8 +101,8 @@ std::shared_ptr<Project> Project::load(std::shared_ptr<TextAccess> xmlAccess)
 	}
 
 	{
-		const TiXmlElement* buildElement = projectElement->FirstChildElement("Build");
-		const TiXmlElement* targetElement = buildElement->FirstChildElement(
+		const XMLElement* buildElement = projectElement->FirstChildElement("Build");
+		const XMLElement* targetElement = buildElement->FirstChildElement(
 			Target::getXmlElementName().c_str());
 		while (targetElement)
 		{
@@ -114,7 +116,7 @@ std::shared_ptr<Project> Project::load(std::shared_ptr<TextAccess> xmlAccess)
 	}
 
 	{
-		const TiXmlElement* unitElement = projectElement->FirstChildElement(
+		const XMLElement* unitElement = projectElement->FirstChildElement(
 			Unit::getXmlElementName().c_str());
 		while (unitElement)
 		{

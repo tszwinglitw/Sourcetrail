@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-class TiXmlElement;
+namespace tinyxml2 { class XMLElement; }
 
 class ApplicationSettings;
 class FilePath;
@@ -19,7 +19,7 @@ class Compiler
 {
 public:
 	static std::string getXmlElementName();
-	static std::shared_ptr<Compiler> create(const TiXmlElement* element);
+	static std::shared_ptr<Compiler> create(const tinyxml2::XMLElement* element);
 
 	const std::vector<std::string>& getOptions() const;
 	const std::vector<std::string>& getDirectories() const;

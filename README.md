@@ -254,4 +254,20 @@ $ cmake --build .
 System build is not tested and therefore not supported.
 
 ### macOS
-System build is not tested and therefore not supported.
+
+Install dependencies via Homebrew:
+```bash
+brew install llvm@18 qt@6 boost icu4c sqlite tinyxml2 catch2 googletest maven openjdk@21 ninja
+```
+
+Build using the provided script:
+```bash
+./script/build_macos.sh release
+```
+
+To also create a `.app` bundle:
+```bash
+./script/build_macos.sh release bundle
+```
+
+The build script handles dependency checking, CMake configuration, and compilation automatically.

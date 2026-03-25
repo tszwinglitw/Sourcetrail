@@ -2,7 +2,9 @@
 
 #include <set>
 
-#include "tinyxml.h"
+#include "tinyxml2.h"
+
+using namespace tinyxml2;
 
 #include "FilePath.h"
 #include "TextAccess.h"
@@ -309,27 +311,25 @@ std::vector<std::string> ConfigManager::getSublevelKeys(const std::string& key) 
 
 bool ConfigManager::load(const std::shared_ptr<TextAccess> textAccess)
 {
-	TiXmlDocument doc;
-	const char* pTest = doc.Parse(textAccess->getText().c_str(), nullptr, TIXML_ENCODING_UTF8);
-	if (pTest != nullptr)
-	{
-		TiXmlHandle docHandle(&doc);
-		TiXmlNode* rootNode = docHandle.FirstChild("config").ToNode();
-		if (rootNode == nullptr)
-		{
-			LOG_ERROR("No rootelement 'config' in the configfile");
-			return false;
-		}
-		for (TiXmlNode* childNode = rootNode->FirstChild(); childNode;
-			 childNode = childNode->NextSibling())
-		{
-			parseSubtree(childNode, "");
-		}
-	}
-	else
+	XMLDocument doc;
+	doc.Parse(textAccess->getText().c_str());
+	if (doc.Error())
 	{
 		LOG_ERROR("Unable to load file.");
 		return false;
+	}
+
+	XMLHandle docHandle(doc);
+	XMLNode* rootNode = docHandle.FirstChildElement("config").ToNode();
+	if (rootNode == nullptr)
+	{
+		LOG_ERROR("No rootelement 'config' in the configfile");
+		return false;
+	}
+	for (XMLNode* childNode = rootNode->FirstChild(); childNode;
+		 childNode = childNode->NextSibling())
+	{
+		parseSubtree(childNode, "");
 	}
 	return true;
 }
@@ -351,12 +351,10 @@ ConfigManager::ConfigManager(const ConfigManager& other) = default;
 
 bool ConfigManager::createXmlDocument(bool saveAsFile, const std::string filepath, std::string& output)
 {
-	bool success = true;
-	TiXmlDocument doc;
-	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "utf-8", "");
-	doc.LinkEndChild(decl);
-	TiXmlElement* root = new TiXmlElement("config");
-	doc.LinkEndChild(root);
+	XMLDocument doc;
+	doc.InsertEndChild(doc.NewDeclaration());
+	XMLElement* root = doc.NewElement("config");
+	doc.InsertEndChild(root);
 
 	for (std::multimap<std::string, std::string>::iterator it = m_values.begin();
 		 it != m_values.end();
@@ -369,51 +367,50 @@ bool ConfigManager::createXmlDocument(bool saveAsFile, const std::string filepat
 
 		std::vector<std::string> tokens = utility::splitToVector(it->first, "/");
 
-		TiXmlElement* element = doc.RootElement();
-		TiXmlElement* child;
+		XMLElement* element = doc.RootElement();
+		XMLElement* child;
 		while (tokens.size() > 1)
 		{
 			child = element->FirstChildElement(tokens.front().c_str());
 			if (!child)
 			{
-				child = new TiXmlElement(tokens.front().c_str());
-				element->LinkEndChild(child);
+				child = doc.NewElement(tokens.front().c_str());
+				element->InsertEndChild(child);
 			}
 			tokens.erase(tokens.begin());
 			element = child;
 		}
 
-		child = new TiXmlElement(tokens.front().c_str());
-		element->LinkEndChild(child);
-		TiXmlText* text = new TiXmlText(it->second.c_str());
-		child->LinkEndChild(text);
+		child = doc.NewElement(tokens.front().c_str());
+		element->InsertEndChild(child);
+		child->SetText(it->second.c_str());
 	}
 
+	bool success = true;
 	if (saveAsFile)
 	{
-		success = doc.SaveFile(filepath.c_str());
+		success = (doc.SaveFile(filepath.c_str()) == XML_SUCCESS);
 	}
 	else
 	{
-		TiXmlPrinter printer;
-		doc.Accept(&printer);
+		XMLPrinter printer;
+		doc.Print(&printer);
 		output = printer.CStr();
 	}
-	success = doc.SaveFile(filepath.c_str());
 	doc.Clear();
 	return success;
 }
 
-void ConfigManager::parseSubtree(TiXmlNode* currentNode, const std::string& currentPath)
+void ConfigManager::parseSubtree(XMLNode* currentNode, const std::string& currentPath)
 {
-	if (currentNode->Type() == TiXmlNode::TINYXML_TEXT)
+	if (currentNode->ToText())
 	{
 		std::string key = currentPath.substr(0, currentPath.size() - 1);
 		m_values.insert(std::pair<std::string, std::string>(key, currentNode->ToText()->Value()));
 	}
 	else
 	{
-		for (TiXmlNode* childNode = currentNode->FirstChild(); childNode;
+		for (XMLNode* childNode = currentNode->FirstChild(); childNode;
 			 childNode = childNode->NextSibling())
 		{
 			parseSubtree(childNode, currentPath + std::string(currentNode->Value()) + "/");

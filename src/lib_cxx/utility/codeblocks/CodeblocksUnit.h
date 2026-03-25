@@ -7,7 +7,7 @@
 #include "CodeblocksCompilerVarType.h"
 
 class FilePath;
-class TiXmlElement;
+namespace tinyxml2 { class XMLElement; }
 
 namespace Codeblocks
 {
@@ -15,7 +15,7 @@ class Unit
 {
 public:
 	static std::string getXmlElementName();
-	static std::shared_ptr<Unit> create(const TiXmlElement* element);
+	static std::shared_ptr<Unit> create(const tinyxml2::XMLElement* element);
 
 	FilePath getCanonicalFilePath(const FilePath& projectFileDirectory) const;
 	CompilerVarType getCompilerVar() const;

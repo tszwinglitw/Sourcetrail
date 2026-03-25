@@ -1,6 +1,8 @@
 #include "CodeblocksUnit.h"
 
-#include "tinyxml.h"
+#include "tinyxml2.h"
+
+using namespace tinyxml2;
 
 #include "FilePath.h"
 
@@ -11,7 +13,7 @@ std::string Unit::getXmlElementName()
 	return "Unit";
 }
 
-std::shared_ptr<Unit> Unit::create(const TiXmlElement* element)
+std::shared_ptr<Unit> Unit::create(const XMLElement* element)
 {
 	if (!element || element->Value() != getXmlElementName())
 	{
@@ -29,7 +31,7 @@ std::shared_ptr<Unit> Unit::create(const TiXmlElement* element)
 		unit->m_filename = value;
 	}
 
-	const TiXmlElement* optionElement = element->FirstChildElement("Option");
+	const XMLElement* optionElement = element->FirstChildElement("Option");
 	while (optionElement)
 	{
 		{
@@ -41,7 +43,7 @@ std::shared_ptr<Unit> Unit::create(const TiXmlElement* element)
 		}
 		{
 			int value = 0;
-			if (optionElement->QueryIntAttribute("compile", &value) == TIXML_SUCCESS)
+			if (optionElement->QueryIntAttribute("compile", &value) == XML_SUCCESS)
 			{
 				unit->m_compile = (value == 1);
 			}

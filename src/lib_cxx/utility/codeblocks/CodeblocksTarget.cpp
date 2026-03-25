@@ -1,6 +1,8 @@
 #include "CodeblocksTarget.h"
 
-#include "tinyxml.h"
+#include "tinyxml2.h"
+
+using namespace tinyxml2;
 
 #include "CodeblocksCompiler.h"
 
@@ -11,7 +13,7 @@ std::string Target::getXmlElementName()
 	return "Target";
 }
 
-std::shared_ptr<Target> Target::create(const TiXmlElement* element)
+std::shared_ptr<Target> Target::create(const XMLElement* element)
 {
 	if (!element || element->Value() != getXmlElementName())
 	{
@@ -30,13 +32,13 @@ std::shared_ptr<Target> Target::create(const TiXmlElement* element)
 	}
 
 	{
-		const TiXmlElement* optionElement = element->FirstChildElement("Option");
+		const XMLElement* optionElement = element->FirstChildElement("Option");
 		while (optionElement)
 		{
 			{
 				int value = 0;
 				if (optionElement->QueryIntAttribute("projectCompilerOptionsRelation", &value) ==
-					TIXML_SUCCESS)
+					XML_SUCCESS)
 				{
 					target->m_projectCompilerOptionsRelation = intToEnum<TargetRelationType>(value);
 				}
@@ -44,7 +46,7 @@ std::shared_ptr<Target> Target::create(const TiXmlElement* element)
 			{
 				int value = 0;
 				if (optionElement->QueryIntAttribute("projectIncludeDirsRelation", &value) ==
-					TIXML_SUCCESS)
+					XML_SUCCESS)
 				{
 					target->m_projectIncludeDirsRelation = intToEnum<TargetRelationType>(value);
 				}
@@ -55,7 +57,7 @@ std::shared_ptr<Target> Target::create(const TiXmlElement* element)
 	}
 
 	{
-		const TiXmlElement* compilerElement = element->FirstChildElement(
+		const XMLElement* compilerElement = element->FirstChildElement(
 			Compiler::getXmlElementName().c_str());
 		std::shared_ptr<Compiler> compiler = Compiler::create(compilerElement);
 		if (!compiler)

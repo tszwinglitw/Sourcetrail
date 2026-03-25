@@ -7,7 +7,7 @@
 #include <vector>
 
 class TextAccess;
-class TiXmlNode;
+namespace tinyxml2 { class XMLNode; }
 class FilePath;
 
 class ConfigManager
@@ -65,7 +65,7 @@ private:
 	ConfigManager(const ConfigManager&);
 	void operator=(const ConfigManager&) = delete;
 
-	void parseSubtree(TiXmlNode* parentElement, const std::string& currentPath);
+	void parseSubtree(tinyxml2::XMLNode* parentElement, const std::string& currentPath);
 	bool createXmlDocument(bool saveAsFile, std::string filepath, std::string& output);
 
 	std::multimap<std::string, std::string> m_values;

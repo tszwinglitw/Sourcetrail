@@ -22,6 +22,15 @@
 		},
 		{
 			"hidden": true,
+			"name": "darwin-presets",
+			"condition": {
+				"type": "equals",
+				"lhs": "${hostSystemName}",
+				"rhs": "Darwin"
+			}
+		},
+		{
+			"hidden": true,
 			"name": "debug-presets",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Debug",
@@ -133,7 +142,33 @@
 			]
 		},
 
-
+		{
+			"name": "system-macos-debug",
+			"inherits": [
+				"darwin-presets",
+				"default-presets",
+				"debug-presets",
+				"sourcetrail-presets"
+			]
+		},
+		{
+			"name": "system-macos-release",
+			"inherits": [
+				"darwin-presets",
+				"default-presets",
+				"release-presets",
+				"sourcetrail-presets"
+			]
+		},
+		{
+			"name": "system-macos-relwithdebinfo",
+			"inherits": [
+				"darwin-presets",
+				"default-presets",
+				"relwithdebinfo-presets",
+				"sourcetrail-presets"
+			]
+		},
 
 		{
 			"name": "vcpkg-debug",

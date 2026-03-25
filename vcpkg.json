@@ -23,7 +23,7 @@
 
 		"sqlite3",
 
-		"tinyxml",
+		"tinyxml2",
 
 		"icu",
 

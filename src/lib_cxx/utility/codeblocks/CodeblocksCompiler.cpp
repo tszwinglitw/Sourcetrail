@@ -1,6 +1,8 @@
 #include "CodeblocksCompiler.h"
 
-#include "tinyxml.h"
+#include "tinyxml2.h"
+
+using namespace tinyxml2;
 
 namespace Codeblocks
 {
@@ -9,7 +11,7 @@ std::string Compiler::getXmlElementName()
 	return "Compiler";
 }
 
-std::shared_ptr<Compiler> Compiler::create(const TiXmlElement* element)
+std::shared_ptr<Compiler> Compiler::create(const XMLElement* element)
 {
 	if (!element || element->Value() != getXmlElementName())
 	{
@@ -19,7 +21,7 @@ std::shared_ptr<Compiler> Compiler::create(const TiXmlElement* element)
 	std::shared_ptr<Compiler> compiler(new Compiler());
 
 	{
-		const TiXmlElement* addElement = element->FirstChildElement("Add");
+		const XMLElement* addElement = element->FirstChildElement("Add");
 		while (addElement)
 		{
 			{
