@@ -7,6 +7,9 @@ on:
     branches: [master]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-macos:
     runs-on: macos-latest
@@ -38,8 +41,11 @@ jobs:
       - name: Stage artifact
         run: cp -a ../build/system-macos-release/Sourcetrail_*_macOS/Sourcetrail.app ./Sourcetrail.app
 
+      - name: Zip .app (preserving symlinks)
+        run: zip -ry Sourcetrail-macOS.zip Sourcetrail.app
+
       - name: Upload .app bundle
         uses: actions/upload-artifact@v4
         with:
           name: Sourcetrail-macOS
-          path: Sourcetrail.app
+          path: Sourcetrail-macOS.zip
