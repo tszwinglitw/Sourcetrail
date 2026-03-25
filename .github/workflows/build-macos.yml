@@ -33,11 +33,13 @@ jobs:
         run: cmake --build ../build/system-macos-release
 
       - name: Bundle .app
-        run: |
-          ./setup/macOS/bundle_macos.sh ../build/system-macos-release
+        run: ./setup/macOS/bundle_macos.sh ../build/system-macos-release
+
+      - name: Stage artifact
+        run: cp -a ../build/system-macos-release/Sourcetrail_*_macOS/Sourcetrail.app ./Sourcetrail.app
 
       - name: Upload .app bundle
         uses: actions/upload-artifact@v4
         with:
           name: Sourcetrail-macOS
-          path: ../build/system-macos-release/Sourcetrail_*_macOS/Sourcetrail.app
+          path: Sourcetrail.app
