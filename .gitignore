@@ -15,3 +15,4 @@ CMakeLists.txt.user
 *.srctrldb
 *-shm
 *-wal
+web/
